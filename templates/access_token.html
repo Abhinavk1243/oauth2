@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Title</title>
+    <meta charset="utf-8" />
+</head>
+
+<body onload=on_load()>
+    <h1>LOGIN</h1>
+    <div>
+        <label>username</label>
+        <input id="username" value="test@test.test" />
+    </div>
+    <br />
+    <div>
+        <label>password</label>
+        <input id="password" type="password" value="password" />
+    </div>
+    <br />
+    <div>
+        <button id="getTokenBtn">Get Token with Credentials</button>
+    </div>
+    <br />
+    <div> Token: <label id="token"></label></div>
+    <br />
+    <div>Refresh Token:<label id="refreshToken"></label></div>
+    <br />
+    <div>Api Result:<p id="apiResult"></p>
+    </div>
+    <br />
+    <div>
+        <p id="error"></p>
+    </div>
+    <div>
+        <button onclick=test_token()>test</button>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    <script src="'https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js'"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js">
+    </script>
+    <script>
+        //The token end point from where we can retrieve the access token
+
+        $("#getTokenBtn").on("click", getToken);
+
+        function getToken() {
+            var tokenEndPoint = "/oauth/token";
+           
+
+            var accessToken;
+            var refreshToken;
+
+            var username = $('#username').val();
+            var password = $('#password').val();
+
+            $.ajax({
+                url: tokenEndPoint,
+                data: {
+                    username: username,
+                    password: password,
+                    grant_type: 'password',
+                    scope: 'email address',
+                    client_id: localStorage.getItem("client_key"),
+                    client_secret: localStorage.getItem("client_secret")
+                },
+                method: 'POST',
+                success: function (data) {
+                    $('#token').text(data.access_token);
+                    $('#refreshToken').text(data.refresh_token);
+                    // document.write(JSON.stringify(data));
+                    localStorage.setItem("bearer_token", data.access_token);
+                    accessToken = data.access_token;
+                    refreshToken = data.refresh_token;
+                },
+                error: function (err) {
+                    toastr.error(err.responseText);
+
+                }
+            })
+        }
+
+        function on_load() {
+            $.ajax({
+                url: "http://127.0.0.1:5000/onload/",
+                type: 'GET',
+                success: function (response) {
+                    // console.log(response);
+                    localStorage.setItem("client_key", response["client_key"]);
+                    localStorage.setItem("client_secret", response["client_secret"])
+                }
+            });
+        }
+
+        function test_token() {
+            $.ajax({
+                url: "http://127.0.0.1:5000/user_detail",
+                type: 'GET',
+                contentType: 'application/json',
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("bearer_token")
+                },
+                async: false,
+                success: function (response) {
+                    console.log(response)
+                },
+                error: function (error) {
+                    console.log("error")
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

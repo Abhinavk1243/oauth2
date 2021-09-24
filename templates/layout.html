@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bootstrap Vertical Form Layout</title>
+
+<style>
+    .divider:after,
+.divider:before {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #eee;
+}
+.h-custom {
+  height: calc(100% - 73px);
+}
+@media (max-width: 450px) {
+  .h-custom {
+    height: 100%;
+  }
+}
+</style>
+<script>
+  $("#login").on("click", getToken);
+  function on_load() {
+            $.ajax({
+                url: "http://127.0.0.1:5000/onload/",
+                type: 'GET',
+                success: function (response) {
+                    // console.log(response);
+                    localStorage.setItem("client_key", response["client_key"]);
+                    localStorage.setItem("client_secret", response["client_secret"])
+                }
+            });
+        }
+
+        
+
+function getToken() {
+    var tokenEndPoint = "/oauth/token";
+    var client_id = "0BIL4LcSPStMo3uaTg0P08poicpRHvz0JaOvnRQe";
+    var client_secret = "txXZjoeldivE3QLM1N2Z4C0k7BjKLv6A6OZG2JPygTiU4jJeuK";
+
+    var accessToken;
+    var refreshToken;
+
+    var username = $('#username').val();
+    var password = $('#password').val();
+
+    $.ajax({
+        url: tokenEndPoint,
+        data: {
+            username: username,
+            password: password,
+            grant_type: 'password',
+            scope: 'email address',
+            client_id: localStorage.getItem("client_key"),
+            client_secret: localStorage.getItem("client_secret")
+        },
+        method: 'POST',
+        success: function (data) {
+            // $('#token').text(data.access_token);
+            // $('#refreshToken').text(data.refresh_token);
+            console.log(data.access_token);
+            localStorage.setItem("bearer_token", data.access_token);
+            accessToken = data.access_token;
+            refreshToken = data.refresh_token;
+        },
+        error: function (err) {
+            toastr.error(err.responseText);
+
+        }
+    })
+}
+</script>
+</head>
+  <body onload=on_load()>
+    {% block body %}{% endblock %}
+  </body>
+</html>
