@@ -76,8 +76,6 @@ def save_token(token, request, *args, **kwargs):
     from model import db
     toks = Token.query.filter_by(client_id=request.client.client_id,
                                  user_id=request.user.id).all()
-    # make sure that every client has only one token connected to a user
-    # session["client"]=
     for t in toks:
         db.session.delete(t)
 
