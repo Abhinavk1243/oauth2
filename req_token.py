@@ -10,7 +10,7 @@ def get_token(base_url):
     base64_basicAuth = (API_CLIENT + ':'+ API_SECRET) .encode("ascii")
     base64_basicAuth = base64.b64encode(base64_basicAuth) 
         
-        # Decode ID and SECRET in Base64 for getting 
+    # Decode ID and SECRET in Base64 for getting 
     base64_basicAuth = base64_basicAuth.decode("ascii") 
     base64_basicAuth = 'Basic ' + base64_basicAuth
     headers = {
