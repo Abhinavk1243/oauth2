@@ -8,13 +8,19 @@ from werkzeug.security import gen_salt
 import json
 from flask import Flask
 from werkzeug.utils import header_property
-from commons import get_config
+from commons import get_config,mysl_pool_connection,logger
 import hashlib
+import pandas as pd 
+
+logger=logger()
+pool_cnxn=mysl_pool_connection("mysql_web_data")
+mycursor=pool_cnxn.cursor
+
 app = Flask(__name__)
 app.debug = True
 app.secret_key = 'development'
 app.config.update({
-        'SQLALCHEMY_DATABASE_URI': get_config('client-cred','sqlalchemey_conn'),
+        'SQLALCHEMY_DATABASE_URI': get_config('client-cred','sqlalchemey_conn',"oauth2_cred.cfg"),
         'SQLALCHEMY_TRACK_MODIFICATIONS':True
     })
 
@@ -31,7 +37,6 @@ def hash_password(password):
     pass_hash = hashlib.md5()
     pass_hash.update(password)
     password=pass_hash.hexdigest()
-    print(password)
     return password
 
 def current_user():
@@ -50,6 +55,7 @@ def get_grant(client_id, code):
 
 @oauth.tokengetter
 def get_token(access_token=None, refresh_token=None):
+    from model import Token,db
     if access_token:
         return Token.query.filter_by(access_token=access_token).first()
     if refresh_token:
@@ -68,16 +74,14 @@ def set_grant(client_id, code, request, *args, **kwargs):
         expires=expires,
         )
     db.session.add(grant)
-    db.session.commit()
+    db.session.commit() 
 
 
 @oauth.tokensetter
 def save_token(token, request, *args, **kwargs):
-    from model import db
+    from model import db,Token
     toks = Token.query.filter_by(client_id=request.client.client_id,
                                  user_id=request.user.id).all()
-    # make sure that every client has only one token connected to a user
-    # session["client"]=
     for t in toks:
         db.session.delete(t)
 
@@ -121,8 +125,8 @@ def welcome():
 
 @app.route("/onload/")
 def onload():
-    consumer_key=get_config('client-cred','client_key')
-    consumer_secret=get_config('client-cred','client_secret')
+    consumer_key=get_config('client-cred','client_key',"oauth2_cred.cfg")
+    consumer_secret=get_config('client-cred','client_secret',"oauth2_cred.cfg")
     client={"client_key":consumer_key,"client_secret":consumer_secret}
     return jsonify(client)
     
@@ -203,39 +207,37 @@ def user_detail():
     oauth=request.oauth
     return jsonify({"username":oauth.user.username,"uid":oauth.user.id})
 
-@app.route('/api/email')
-@oauth.require_oauth('email')
-def email_api():
-    oauth = request.oauth
-    return jsonify(email='me@oauth.net', username=oauth.user.username)
 
-@app.route('/api/client')
+@app.route("/dashboard/")
 @oauth.require_oauth()
-def client_api():
-    oauth = request.oauth
-    client={"client_name":oauth.client.name,"client_id":oauth.client.client_id}
-    return jsonify(client)
+def dashboard():
+    return render_template("about_us.html")
 
-@app.route('/api/address/<city>')
-@oauth.require_oauth('address')
-def address_api(city):
-    oauth = request.oauth
-    return jsonify(address=city, username=oauth.user.username)
+# @app.route("/test/",methods=["GET","POST"])
+# def test():
+#     if request.method=="POST":
+        
+#         data=request.get_json(force=True)
+#         return data
+#     return render_template("table.html")
+#     # return data
 
-@app.route('/api/method', methods=['GET', 'POST', 'PUT', 'DELETE'])
-@oauth.require_oauth()
-def method_api():
-    return jsonify(method=request.method)
 
+#
 @oauth.invalid_response
 def require_oauth_invalid(req):
-    if req.error_message=="Bearer token not found.":
-        return jsonify(message="Unauthorized access of URL"), 401
-        # return render_template("unoauth.html",error="Unauthorized access of URL")
+    return jsonify(message="Unauthorized access of URL"), 401
 
 
-
+    
 if __name__=="__main__":
     from model import db,User,Client,Token,Grant
+    
     db.create_all()
+    from student_bp import student_bp
+    from employee_bp import employee_bp
+    app.register_blueprint(student_bp,url_prefix="/student")
+    app.register_blueprint(employee_bp,url_prefix="/employee")
+
     app.run(debug=True)
+    
