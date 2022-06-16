@@ -1,11 +1,11 @@
 from datetime import datetime
 from flask import Blueprint,render_template,redirect,url_for,request,jsonify,flash,session
-from commons import mysl_pool_connection,logger
+from commons import mysql_pool_connection,logger
 import pandas as pd
 from app import oauth
 # from model import db,User,Client,Token,Grant
 
-pool_cnxn=mysl_pool_connection("mysql_web_data")
+pool_cnxn=mysql_pool_connection("mysql_web_data")
 mycursor=pool_cnxn.cursor()
 logger=logger()
 

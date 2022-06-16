@@ -1,10 +1,10 @@
 from datetime import datetime
 from flask import Blueprint, json,render_template,redirect,url_for,request,jsonify,flash,session
-from commons import mysl_pool_connection,logger
+from commons import mysql_pool_connection,logger
 import pandas as pd
 from app import oauth
 
-pool_cnxn=mysl_pool_connection("mysql_web_data")
+pool_cnxn=mysql_pool_connection("mysql_web_data")
 mycursor=pool_cnxn.cursor()
 logger=logger()
 
@@ -42,13 +42,13 @@ def get_employee():
             return jsonify({"error":message}),400
         else:
             df = pd.read_sql(con=pool_cnxn, sql=sql)
-            employee = df.to_dict(orient="record")
+            employee = df.to_dict(orient="records")
             response = {"response":{"method":"GET","Status_Code":200,"description":"return record of employee","data":employee}}
             return jsonify(response)   
     
     else:
         df=pd.read_sql(con=pool_cnxn, sql=sql)
-        employee = df.to_dict(orient="record")
+        employee = df.to_dict(orient="records")
         response={"response":{"method":"GET","Status_Code":200,"description":"return record of emplyee","data":employee}}
         return jsonify(response)  ,200
 
