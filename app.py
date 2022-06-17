@@ -20,8 +20,8 @@ app = Flask(__name__)
 app.debug = True
 app.secret_key = 'development'
 app.config.update({
-        # 'SQLALCHEMY_DATABASE_URI': get_config('client-cred','sqlalchemey_conn',"oauth2_cred.cfg"),
-        'SQLALCHEMY_DATABASE_URI' :'mysql+mysqlconnector://root:abhinav12@127.0.0.1:3306/oauth2?auth_plugin=mysql_native_password',
+        'SQLALCHEMY_DATABASE_URI': get_config('client-cred','sqlalchemey_conn',"oauth2_cred.cfg"),
+        # 'SQLALCHEMY_DATABASE_URI' :'mysql+mysqlconnector://root:abhinav12@127.0.0.1:3306/oauth2?auth_plugin=mysql_native_password',
         'SQLALCHEMY_TRACK_MODIFICATIONS':True
     })
 
