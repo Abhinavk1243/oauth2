@@ -122,10 +122,7 @@
                     localStorage.setItem("bearer_token", data.access_token);
                     accessToken = data.access_token;
                     refreshToken = data.refresh_token;
-                    window.location.href="/dashboard"
-                    // window.location.href="/dashboard"
                     dashboard()
-                    // window.location.href="/dashboard"
                 },
                 error: function (err) {
                     toastr.error(err.responseText);
@@ -149,24 +146,26 @@
        
 
         function dashboard() {
-            // $.ajax({
-            //     url: "/dashboard",
-            //     type: 'GET',
-            //     // contentType: 'application/json',
-            //     headers: {
-            //         "Authorization": "Bearer " + localStorage.getItem("bearer_token")
-            //     },
-            //     async: false,
-            //     success: function (response) {
-            //         document.write(response)
-            //     // console.log(response);
+            $.ajax({
+                url: "/dashboard",
+                type: 'GET',
+                // contentType: 'application/json',
+                headers: {
+                    "Authorization": "Bearer " + localStorage.getItem("bearer_token")
+                },
+                async: false,
+                success: function (response) {
+                    document.write(response);
+                    window.history.pushState("data","Title","/dashboard/");
+                    document.title="dashboard"
+                
                     
-            //     },
-            //     error: function (error) {
-            //         console.log("error")
-            //     }
-            // });
-            // window.location.href="/dashboard"
+                },
+                error: function (error) {
+                    console.log("error")
+                }
+            });
+            
         }
     </script>
 </head>

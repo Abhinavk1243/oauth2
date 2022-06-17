@@ -119,3 +119,12 @@ class Token(db.Model):
         db.session.delete(self)
         db.session.commit()
         return self
+    
+    
+
+
+
+
+        
+
+    

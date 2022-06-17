@@ -8,12 +8,12 @@ from werkzeug.security import gen_salt
 import json
 from flask import Flask
 from werkzeug.utils import header_property
-from commons import get_config,mysl_pool_connection,logger
+from commons import get_config,logger,mysql_pool_connection
 import hashlib
 import pandas as pd 
 
 logger=logger()
-pool_cnxn=mysl_pool_connection("mysql_web_data")
+pool_cnxn=mysql_pool_connection("mysql_web_data")
 mycursor=pool_cnxn.cursor
 
 app = Flask(__name__)
@@ -21,6 +21,7 @@ app.debug = True
 app.secret_key = 'development'
 app.config.update({
         'SQLALCHEMY_DATABASE_URI': get_config('client-cred','sqlalchemey_conn',"oauth2_cred.cfg"),
+        # 'SQLALCHEMY_DATABASE_URI' :'mysql+mysqlconnector://root:abhinav12@127.0.0.1:3306/oauth2?auth_plugin=mysql_native_password',
         'SQLALCHEMY_TRACK_MODIFICATIONS':True
     })
 
